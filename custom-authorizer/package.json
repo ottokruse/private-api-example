@@ -1,0 +1,19 @@
+{
+  "name": "custom-authorizer",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "aws-apigw-authorizer": "^0.1.20",
+    "aws-sdk": "^2.353.0"
+  },
+  "devDependencies": {
+    "@types/node": "^10.12.5"
+  }
+}

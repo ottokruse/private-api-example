@@ -1,0 +1,19 @@
+{
+  "name": "private-api-example",
+  "version": "1.0.0",
+  "description": "This is a sample template for sam-app - Below is a brief explanation of what we have generated for you:",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "postinstall": "cd custom-authorizer && npm i --upgrade && cd -",
+    "tsc": "tsc"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@types/node": "^10.12.9",
+    "time": "^0.12.0",
+    "typescript": "^3.1.6"
+  }
+}

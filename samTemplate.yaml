@@ -1,0 +1,115 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+    sam-app
+
+    Sample SAM Template for sam-app
+    
+# More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
+Globals:
+    Function:
+        Timeout: 3
+
+
+Resources:
+
+    MyApi:
+        Type: AWS::Serverless::Api
+        Properties:
+            StageName: demo
+            Auth:
+                Authorizers:
+                    MyCognitoAuth:
+                        UserPoolArn: arn:aws:cognito-idp:eu-west-1:520945424137:userpool/eu-west-1_cfE3x56oc
+                    MyCustomAuthorizer:
+                        FunctionPayloadType: REQUEST
+                        FunctionArn: !GetAtt CustomAuthorizer.Arn
+                        Identity:
+                            Headers:
+                            - Authorization
+                            Context:
+                            - identity.sourceIp
+                            ReauthorizeEvery: 0 # OPTIONAL; Service Default: 300
+
+    HelloWorld:
+        Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+        Properties:
+            CodeUri: hello_world/
+            Handler: app.lambdaHandler
+            Runtime: nodejs8.10
+            Events:
+                HelloWorld:
+                    Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+                    Properties:
+                        RestApiId: !Ref MyApi
+                        Path: /hello/no-auth
+                        Method: get
+
+    HelloWorldCustomAuth:
+        Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+        Properties:
+            CodeUri: hello_world/
+            Handler: app.lambdaHandler
+            Runtime: nodejs8.10
+            Events:
+                HelloWorld:
+                    Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+                    Properties:
+                        RestApiId: !Ref MyApi
+                        Auth:
+                            Authorizer: MyCustomAuthorizer
+                        Path: /hello/custom-auth
+                        Method: get
+
+    HelloWorldCognitoAuth:
+        Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+        Properties:
+            CodeUri: hello_world/
+            Handler: app.lambdaHandler
+            Runtime: nodejs8.10
+            Events:
+                HelloWorld:
+                    Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+                    Properties:
+                        RestApiId: !Ref MyApi
+                        Auth:
+                            Authorizer: MyCognitoAuth
+                        Path: /hello/cognito-auth
+                        Method: get
+
+    CustomAuthorizer:
+        Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+        Properties:
+            CodeUri: custom-authorizer/
+            Handler: custom-authorizer.handler
+            Runtime: nodejs8.10
+            Policies:
+                - DynamoDBReadPolicy:
+                    TableName: username-vehicle-mapping
+            Environment:
+                Variables:
+                    ALLOWED_IP_ADDRESSES: 0.0.0.0/0
+                    BASIC_AUTH_USER_mike: hellomike
+                    AUDIENCE_URI: 42knffvu5cujtrs02u4ec0aegs
+                    ISSUER_URI: https://cognito-idp.eu-west-1.amazonaws.com/eu-west-1_cfE3x56oc
+                    JWKS_URI: https://cognito-idp.eu-west-1.amazonaws.com/eu-west-1_cfE3x56oc/.well-known/jwks.json
+                    USER_VEHICLE_MAPPING_TABLE: username-vehicle-mapping
+
+    UserVehicleMappingTable:
+        Type: AWS::Serverless::SimpleTable
+        Properties:
+            TableName: username-vehicle-mapping
+            PrimaryKey:
+                Name: username
+                Type: String
+            ProvisionedThroughput:
+                ReadCapacityUnits: 1
+                WriteCapacityUnits: 1
+            SSESpecification:
+                SSEEnabled: true
+
+Outputs:
+
+    ApiBaseUrl:
+      Description: "API Gateway endpoint base URL"
+      Value: !Sub "https://${MyApi}.execute-api.${AWS::Region}.amazonaws.com/"
