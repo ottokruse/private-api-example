@@ -10,10 +10,10 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "aws-apigw-authorizer": "^0.1.20",
-    "aws-sdk": "^2.353.0"
+    "aws-apigw-authorizer": "^0.1.25",
+    "aws-sdk": "^2.399.0"
   },
   "devDependencies": {
-    "@types/node": "^10.12.5"
+    "@types/node": "^10.12.23"
   }
 }
